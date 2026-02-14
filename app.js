@@ -23,6 +23,11 @@ ExcelInput.addEventListener('change', (e) => {
     reader.readAsArrayBuffer(file);
 });
 
+// Initial logic to ensure empty state is visible correctly
+window.addEventListener('DOMContentLoaded', () => {
+    updateUI();
+});
+
 DataSourceSelector.addEventListener('change', (e) => {
     const value = e.target.value;
     if (value === 'upload') {
@@ -203,10 +208,6 @@ function renderSelectors() {
     MonthSelector.innerHTML = '<option value="all">All Months</option>' + mNames.map((n, i) => `<option value="${i}">${n}</option>`).join('');
 
     YearSelector.onchange = MonthSelector.onchange = TypeSelector.onchange = SearchInput.oninput = updateUI; // Add Search listener
-
-    ['emptyState', 'insightsSection', 'statsSection', 'closingSection', 'chartsSection', 'filterSection', 'reportSection'].forEach(id => {
-        document.getElementById(id).classList.toggle('hidden', id === 'emptyState');
-    });
 }
 
 function isCorrection(r) {
@@ -301,6 +302,13 @@ function updateUI() {
     renderTable(filtered);
     renderCharts(filtered);
     renderInsights(filtered);
+
+    // Dynamic visibility
+    const hasData = dashboardData.length > 0;
+    ['emptyState'].forEach(id => document.getElementById(id).classList.toggle('hidden', hasData));
+    ['statsSection', 'closingSection', 'chartsSection', 'filterSection', 'reportSection', 'insightsSection'].forEach(id => {
+        document.getElementById(id).classList.toggle('hidden', !hasData);
+    });
 }
 
 function renderClosingSummary(net, year, month) {

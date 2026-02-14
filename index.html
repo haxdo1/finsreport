@@ -54,18 +54,18 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-4">
+            <div class="flex flex-col md:flex-row items-stretch md:items-center gap-4 w-full md:w-auto">
                 <!-- Data Source Selector -->
-                <div class="glass px-4 py-2 rounded-2xl border-white/10 flex items-center gap-3">
+                <div class="glass px-4 py-2 rounded-2xl border-white/10 flex items-center gap-3 w-full md:w-auto">
                     <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
                     <input type="text" id="searchInput" placeholder="Search transactions..."
-                        class="bg-transparent text-sm font-semibold text-slate-200 outline-none w-48 placeholder-slate-500">
+                        class="bg-transparent text-sm font-semibold text-slate-200 outline-none w-full md:w-48 placeholder-slate-500">
                 </div>
 
-                <div class="glass px-4 py-2 rounded-2xl border-white/10 flex items-center gap-3">
+                <div class="glass px-4 py-2 rounded-2xl border-white/10 flex items-center gap-3 w-full md:w-auto">
                     <i data-lucide="database" class="w-4 h-4 text-slate-400"></i>
                     <select id="dataSourceSelector"
-                        class="bg-transparent text-sm font-semibold text-slate-200 outline-none cursor-pointer">
+                        class="bg-transparent text-sm font-semibold text-slate-200 outline-none cursor-pointer w-full md:w-auto">
                         <option class="bg-dark-900 text-slate-200" value="upload">Custom Upload</option>
                         <option class="bg-dark-900 text-slate-200" value="combined">Combined Data (All)</option>
                         <option class="bg-dark-900 text-slate-200" value="Proposal.xlsx">Proposal Data</option>
@@ -80,9 +80,9 @@
                     </select>
                 </div>
 
-                <label id="uploadBtnLabel" for="excelInput" class="cursor-pointer group">
+                <label id="uploadBtnLabel" for="excelInput" class="cursor-pointer group w-full md:w-auto">
                     <div
-                        class="glass flex items-center gap-3 px-6 py-3 rounded-2xl border-white/10 hover:border-accent-blue/50 transition-all">
+                        class="glass flex items-center justify-center gap-3 px-6 py-3 rounded-2xl border-white/10 hover:border-accent-blue/50 transition-all w-full md:w-auto">
                         <i data-lucide="upload-cloud"
                             class="w-5 h-5 text-accent-blue group-hover:scale-110 transition-transform"></i>
                         <span class="font-semibold text-sm uppercase tracking-wider">Upload Excel</span>
@@ -196,60 +196,61 @@
         </div>
 
         <!-- Filters -->
-        <div id="filterSection" class="flex flex-wrap items-center gap-4 mb-8 hidden animate-slide-up print:hidden">
+        <div id="filterSection"
+            class="grid grid-cols-1 sm:grid-cols-2 md:flex flex-wrap items-center gap-4 mb-8 hidden animate-slide-up print:hidden">
             <select id="yearSelector"
-                class="glass px-6 py-3 rounded-xl text-white outline-none border-white/10 focus:border-accent-blue"></select>
+                class="glass px-6 py-3 rounded-xl text-white outline-none border-white/10 focus:border-accent-blue w-full md:w-auto"></select>
             <select id="monthSelector"
-                class="glass px-6 py-3 rounded-xl text-white outline-none border-white/10 focus:border-accent-blue"></select>
+                class="glass px-6 py-3 rounded-xl text-white outline-none border-white/10 focus:border-accent-blue w-full md:w-auto"></select>
             <select id="typeSelector"
-                class="glass px-6 py-3 rounded-xl text-white outline-none border-white/10 focus:border-accent-blue">
+                class="glass px-6 py-3 rounded-xl text-white outline-none border-white/10 focus:border-accent-blue w-full md:w-auto md:min-w-[150px]">
                 <option value="all" class="bg-dark-900">All Types</option>
                 <option value="deposit" class="bg-dark-900">Deposit (Masuk)</option>
                 <option value="withdraw" class="bg-dark-900">Withdraw (Keluar)</option>
             </select>
+        </div>
 
-
-            <!-- Table -->
-            <div id="reportSection" class="glass rounded-3xl overflow-hidden hidden animate-slide-up">
-                <div class="p-8 border-b border-white/10 flex flex-wrap justify-between items-center gap-4">
-                    <div class="flex items-center gap-4">
-                        <h3 class="font-semibold font-outfit">Detailed Transactions</h3>
-                        <span id="transCount" class="text-xs bg-white/10 px-3 py-1 rounded-full text-slate-400">0
-                            Records</span>
-                    </div>
-                    <button onclick="downloadReport()"
-                        class="flex items-center gap-2 px-4 py-2 bg-green-500/10 hover:bg-green-500/20 text-green-500 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors">
-                        <i data-lucide="download" class="w-4 h-4"></i>
-                        Download Report
-                    </button>
+        <!-- Table -->
+        <div id="reportSection" class="glass rounded-3xl overflow-hidden hidden animate-slide-up mb-12">
+            <div class="p-8 border-b border-white/10 flex flex-wrap justify-between items-center gap-4">
+                <div class="flex items-center gap-4">
+                    <h3 class="font-semibold font-outfit">Detailed Transactions</h3>
+                    <span id="transCount" class="text-xs bg-white/10 px-3 py-1 rounded-full text-slate-400">0
+                        Records</span>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left table-fixed min-w-[1200px]">
-                        <thead class="bg-white/2 text-xs text-slate-400 uppercase font-bold tracking-wider">
-                            <tr>
-                                <th class="px-6 py-4 w-[180px]">Date & Time</th>
-                                <th class="px-6 py-4 w-[200px]">Issued By</th>
-                                <th class="px-6 py-4 text-right w-[150px]">Debit (Masuk)</th>
-                                <th class="px-6 py-4 text-right w-[150px]">Kredit (Keluar)</th>
-                                <th class="px-6 py-4 text-right w-[150px]">Saldo (Balance)</th>
-                                <th class="px-6 py-4">Reason</th>
-                            </tr>
-                        </thead>
-                        <tbody id="reportTableBody" class="divide-y divide-white/5 text-sm"></tbody>
-                    </table>
-                </div>
+                <button onclick="downloadReport()"
+                    class="flex items-center gap-2 px-4 py-2 bg-green-500/10 hover:bg-green-500/20 text-green-500 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    Download Report
+                </button>
             </div>
-
-            <!-- Empty State -->
-            <div id="emptyState" class="py-20 flex flex-col items-center animate-slide-up">
-                <div class="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center mb-6">
-                    <i data-lucide="file-spreadsheet" class="w-10 h-10 text-slate-600"></i>
-                </div>
-                <h2 class="text-xl font-bold text-slate-300">No Data Loaded</h2>
-                <p class="text-slate-500 text-center max-w-xs mt-2">Upload your Excel file to generate the financial
-                    report
-                    and analytics.</p>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left table-fixed min-w-[1200px]">
+                    <thead class="bg-white/2 text-xs text-slate-400 uppercase font-bold tracking-wider">
+                        <tr>
+                            <th class="px-6 py-4 w-[180px]">Date & Time</th>
+                            <th class="px-6 py-4 w-[200px]">Issued By</th>
+                            <th class="px-6 py-4 text-right w-[150px]">Debit (Masuk)</th>
+                            <th class="px-6 py-4 text-right w-[150px]">Kredit (Keluar)</th>
+                            <th class="px-6 py-4 text-right w-[150px]">Saldo (Balance)</th>
+                            <th class="px-6 py-4">Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody" class="divide-y divide-white/5 text-sm"></tbody>
+                </table>
             </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="min-h-[60vh] flex flex-col items-center justify-center animate-slide-up">
+            <div class="glass p-12 rounded-[2rem] border-white/10 text-center max-w-lg w-full">
+                <div class="w-20 h-20 rounded-2xl bg-white/5 flex items-center justify-center mb-6 mx-auto">
+                    <i data-lucide="upload-cloud" class="w-8 h-8 text-slate-500"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">No Data Available</h2>
+                <p class="text-slate-400">Please select or upload the data first.</p>
+            </div>
+        </div>
     </main>
 
     <footer class="py-12 text-center text-slate-500 text-xs">
