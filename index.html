@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Report</title>
+    <link rel="icon" type="image/png" href="https://i.imgur.com/s4itB88.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="print.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: { 800: '#0d1117', 900: '#030508' },
+                        accent: { blue: '#3b82f6', purple: '#8b5cf6' }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-dark-900 text-slate-200 font-sans min-h-screen">
+    <div class="bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <main class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row items-center justify-between mb-12 animate-slide-up gap-6">
+            <div class="flex items-center gap-6">
+                <img src="https://i.imgur.com/s4itB88.png" alt="Logo"
+                    class="w-20 drop-shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+                <div>
+                    <h1 class="font-outfit text-3xl font-bold tracking-tight">Financial Dashboard</h1>
+                    <p class="text-slate-400 text-sm">Yearly Financial Report</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <!-- Data Source Selector -->
+                <div class="glass px-4 py-2 rounded-2xl border-white/10 flex items-center gap-3">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
+                    <input type="text" id="searchInput" placeholder="Search transactions..."
+                        class="bg-transparent text-sm font-semibold text-slate-200 outline-none w-48 placeholder-slate-500">
+                </div>
+
+                <div class="glass px-4 py-2 rounded-2xl border-white/10 flex items-center gap-3">
+                    <i data-lucide="database" class="w-4 h-4 text-slate-400"></i>
+                    <select id="dataSourceSelector"
+                        class="bg-transparent text-sm font-semibold text-slate-200 outline-none cursor-pointer">
+                        <option class="bg-dark-900 text-slate-200" value="upload">Custom Upload</option>
+                        <option class="bg-dark-900 text-slate-200" value="combined">Combined Data (All)</option>
+                        <option class="bg-dark-900 text-slate-200" value="Proposal.xlsx">Proposal Data</option>
+                        <option class="bg-dark-900 text-slate-200" value="Reimbursement.xlsx">Reimbursement Data
+                        </option>
+                    </select>
+                </div>
+
+                <label id="uploadBtnLabel" for="excelInput" class="cursor-pointer group">
+                    <div
+                        class="glass flex items-center gap-3 px-6 py-3 rounded-2xl border-white/10 hover:border-accent-blue/50 transition-all">
+                        <i data-lucide="upload-cloud"
+                            class="w-5 h-5 text-accent-blue group-hover:scale-110 transition-transform"></i>
+                        <span class="font-semibold text-sm uppercase tracking-wider">Upload Excel</span>
+                    </div>
+                    <input type="file" id="excelInput" class="hidden" accept=".xlsx, .xls, .csv">
+                </label>
+            </div>
+        </header>
+
+        <!-- Key Insights Banner -->
+        <div id="insightsSection"
+            class="glass p-6 rounded-3xl mb-8 animate-slide-up hidden flex flex-col md:flex-row items-center gap-6 border-accent-blue/20">
+            <div class="w-12 h-12 rounded-2xl bg-accent-blue/20 flex items-center justify-center shrink-0">
+                <i data-lucide="sparkles" class="w-6 h-6 text-accent-blue"></i>
+            </div>
+            <div class="flex-grow text-center md:text-left">
+                <h4 class="text-sm font-bold text-accent-blue uppercase tracking-widest mb-1">Key Insights</h4>
+                <p id="insightsText" class="text-slate-300 text-sm leading-relaxed">Analyzing trends...</p>
+            </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div id="statsSection" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 animate-slide-up hidden">
+            <div class="glass p-8 rounded-3xl card-hover relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="trending-up"
+                        class="w-16 h-16 text-green-500"></i></div>
+                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Total Deposit</p>
+                <h2 id="totalDeposit" class="text-4xl font-outfit font-bold text-white tracking-tight">$0</h2>
+            </div>
+            <div class="glass p-8 rounded-3xl card-hover relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="trending-down"
+                        class="w-16 h-16 text-red-500"></i></div>
+                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Total Withdraw</p>
+                <h2 id="totalWithdraw" class="text-4xl font-outfit font-bold text-white tracking-tight">$0</h2>
+            </div>
+            <div class="glass p-8 rounded-3xl card-hover relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="wallet"
+                        class="w-16 h-16 text-accent-blue"></i></div>
+                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Current Balance</p>
+                <h2 id="netBalance" class="text-4xl font-outfit font-bold text-white tracking-tight">$0</h2>
+            </div>
+        </div>
+
+        <!-- Closing Summary -->
+        <div id="closingSection"
+            class="glass p-8 rounded-3xl mb-8 animate-slide-up hidden border-dashed border-accent-blue/30">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                <div class="flex items-center gap-5">
+                    <div id="closingIconStatus"
+                        class="w-14 h-14 rounded-2xl flex items-center justify-center transition-colors">
+                        <i id="closingIcon" data-lucide="lock" class="w-7 h-7"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold font-outfit text-xl text-white">Ringkasan Tutup Buku</h3>
+                        <p id="closingStatusText" class="text-slate-400 text-sm">Status: Menghitung...</p>
+                    </div>
+                </div>
+
+                <div id="closingInstruction"
+                    class="flex-grow max-w-2xl bg-white/5 p-4 rounded-2xl text-sm border border-white/5 hidden">
+                    <p class="text-slate-400 mb-1 font-bold uppercase text-[10px] tracking-widest">Instruksi Tutup Buku
+                    </p>
+                    <p id="closingInstructionText" class="text-slate-200 italic"></p>
+                </div>
+
+                <div class="flex gap-3">
+                    <button id="copyClosingInstructionBtn"
+                        class="px-6 py-3 bg-accent-blue/10 hover:bg-accent-blue text-accent-blue hover:text-white rounded-xl font-semibold transition-all flex items-center gap-2 text-sm hidden">
+                        <i data-lucide="copy" class="w-4 h-4"></i>
+                        Salin Instruksi
+                    </button>
+                    <div id="balancedBadge"
+                        class="px-6 py-3 bg-green-500/20 text-green-500 rounded-xl font-bold flex items-center gap-2 text-sm border border-green-500/30 hidden">
+                        <i data-lucide="check-circle" class="w-4 h-4"></i>
+                        SEIMBANG (0)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div id="chartsSection" class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 animate-slide-up hidden">
+            <div class="glass p-8 rounded-3xl lg:col-span-4">
+                <div class="flex items-center gap-3 mb-8">
+                    <i data-lucide="bar-chart-3" class="w-5 h-5 text-accent-blue"></i>
+                    <h3 class="font-semibold font-outfit">Trend Analysis</h3>
+                </div>
+                <div class="h-[250px]"><canvas id="trendChart"></canvas></div>
+            </div>
+            <div class="glass p-8 rounded-3xl lg:col-span-4">
+                <div class="flex items-center gap-3 mb-8">
+                    <i data-lucide="pie-chart" class="w-5 h-5 text-accent-purple"></i>
+                    <h3 class="font-semibold font-outfit">Spending Categories</h3>
+                </div>
+                <div class="h-[250px]"><canvas id="categoryChart"></canvas></div>
+            </div>
+            <div class="glass p-8 rounded-3xl lg:col-span-4">
+                <div class="flex items-center gap-3 mb-8">
+                    <i data-lucide="building-2" class="w-5 h-5 text-pink-500"></i>
+                    <h3 class="font-semibold font-outfit">By Division</h3>
+                </div>
+                <div class="h-[250px]"><canvas id="divisionChart"></canvas></div>
+            </div>
+            <div class="glass p-8 rounded-3xl lg:col-span-12">
+                <div class="flex items-center gap-3 mb-8">
+                    <i data-lucide="users" class="w-5 h-5 text-accent-blue"></i>
+                    <h3 class="font-semibold font-outfit">Top Issuers (Personnel Activity)</h3>
+                </div>
+                <div class="h-[300px]"><canvas id="personnelChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div id="filterSection" class="flex flex-wrap items-center gap-4 mb-8 hidden animate-slide-up print:hidden">
+            <select id="yearSelector"
+                class="glass px-6 py-3 rounded-xl text-white outline-none border-white/10 focus:border-accent-blue"></select>
+            <select id="monthSelector"
+                class="glass px-6 py-3 rounded-xl text-white outline-none border-white/10 focus:border-accent-blue"></select>
+            <select id="typeSelector"
+                class="glass px-6 py-3 rounded-xl text-white outline-none border-white/10 focus:border-accent-blue">
+                <option value="all" class="bg-dark-900">All Types</option>
+                <option value="deposit" class="bg-dark-900">Deposit (Masuk)</option>
+                <option value="withdraw" class="bg-dark-900">Withdraw (Keluar)</option>
+            </select>
+
+
+            <!-- Table -->
+            <div id="reportSection" class="glass rounded-3xl overflow-hidden hidden animate-slide-up">
+                <div class="p-8 border-b border-white/10 flex flex-wrap justify-between items-center gap-4">
+                    <div class="flex items-center gap-4">
+                        <h3 class="font-semibold font-outfit">Detailed Transactions</h3>
+                        <span id="transCount" class="text-xs bg-white/10 px-3 py-1 rounded-full text-slate-400">0
+                            Records</span>
+                    </div>
+                    <button onclick="downloadReport()"
+                        class="flex items-center gap-2 px-4 py-2 bg-green-500/10 hover:bg-green-500/20 text-green-500 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        Download Report
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left table-fixed min-w-[1200px]">
+                        <thead class="bg-white/2 text-xs text-slate-400 uppercase font-bold tracking-wider">
+                            <tr>
+                                <th class="px-6 py-4 w-[180px]">Date & Time</th>
+                                <th class="px-6 py-4 w-[200px]">Issued By</th>
+                                <th class="px-6 py-4 text-right w-[150px]">Debit (Masuk)</th>
+                                <th class="px-6 py-4 text-right w-[150px]">Kredit (Keluar)</th>
+                                <th class="px-6 py-4 text-right w-[150px]">Saldo (Balance)</th>
+                                <th class="px-6 py-4">Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportTableBody" class="divide-y divide-white/5 text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="py-20 flex flex-col items-center animate-slide-up">
+                <div class="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center mb-6">
+                    <i data-lucide="file-spreadsheet" class="w-10 h-10 text-slate-600"></i>
+                </div>
+                <h2 class="text-xl font-bold text-slate-300">No Data Loaded</h2>
+                <p class="text-slate-500 text-center max-w-xs mt-2">Upload your Excel file to generate the financial
+                    report
+                    and analytics.</p>
+            </div>
+    </main>
+
+    <footer class="py-12 text-center text-slate-500 text-xs">
+        <p>© 2026 Financial Reporting System. All rights reserved.</p>
+    </footer>
+
+    <script src="app.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>
