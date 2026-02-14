@@ -39,21 +39,35 @@ DataSourceSelector.addEventListener('change', (e) => {
 function loadCombinedData() {
     document.getElementById('insightsText').innerText = "Loading combined data...";
 
-    Promise.all([
-        fetch('Proposal.xlsx').then(res => { if (!res.ok) throw new Error("Proposal.xlsx missing"); return res.arrayBuffer(); }),
-        fetch('Reimbursement.xlsx').then(res => { if (!res.ok) throw new Error("Reimbursement.xlsx missing"); return res.arrayBuffer(); })
-    ]).then(([propData, reimbData]) => {
-        const wb1 = XLSX.read(propData, { type: 'array' });
-        const raw1 = XLSX.utils.sheet_to_json(wb1.Sheets[wb1.SheetNames[0]]);
+    const files = [
+        'Proposal.xlsx',
+        'Reimbursement.xlsx',
+        'Bank Administration 2026.xlsx',
+        'Bank Division 2026.xlsx',
+        'Bank Segment Partnership 2026.xlsx'
+    ];
 
-        const wb2 = XLSX.read(reimbData, { type: 'array' });
-        const raw2 = XLSX.utils.sheet_to_json(wb2.Sheets[wb2.SheetNames[0]]);
+    Promise.all(files.map(url =>
+        fetch(url).then(res => {
+            if (!res.ok) throw new Error(`${url} missing`);
+            return res.arrayBuffer();
+        })
+    )).then(buffers => {
+        const combined = [];
 
-        const combined = [...raw1, ...raw2];
+        buffers.forEach(buffer => {
+            const wb = XLSX.read(buffer, { type: 'array' });
+            if (wb.SheetNames.length > 0) {
+                const sheet = wb.Sheets[wb.SheetNames[0]];
+                const raw = XLSX.utils.sheet_to_json(sheet);
+                combined.push(...raw);
+            }
+        });
+
         processData(combined);
     }).catch(err => {
         console.error("Error loading combined files:", err);
-        document.getElementById('insightsText').innerText = "Failed to load combined data.";
+        document.getElementById('insightsText').innerText = `Failed to load combined data: ${err.message}`;
     });
 }
 
