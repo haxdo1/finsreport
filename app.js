@@ -271,8 +271,6 @@ function updateUI() {
     }
 
     // Exclude corrections/errors from all stats and views
-    // Exclude corrections/errors from all stats and views
-    // Now uses the smart pairing flag 'isExcluded'
     filtered = filtered.filter(d => !d.isExcluded);
 
     const dep = filtered.filter(d => d.action.toLowerCase() === 'deposit').reduce((s, d) => s + d.balance, 0);
@@ -538,7 +536,7 @@ function downloadReport() {
     // Add Footer Row
     // Total should be net balance? Or just separate totals?
     // Usually "Saldo" column bottom is the final balance.
-    data.push(["", "", "TOTAL SELURUH", totalDebit, totalCredit, runningBalance]);
+    data.push(["", "", "TOTAL JUMLAH", totalDebit, totalCredit, runningBalance]);
 
     // 6. Generate Sheet
     const ws = XLSX.utils.aoa_to_sheet(data);
