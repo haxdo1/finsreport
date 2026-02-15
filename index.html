@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Financial Regulator</title>
+    <title>Financial Report</title>
     <link rel="icon" type="image/png" href="https://i.imgur.com/s4itB88.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
@@ -208,6 +208,12 @@
                 <option value="deposit" class="bg-dark-900">Deposit (Masuk)</option>
                 <option value="withdraw" class="bg-dark-900">Withdraw (Keluar)</option>
             </select>
+            <div class="glass px-4 py-2 rounded-xl border-white/10 flex items-center gap-3 w-full md:w-auto">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500 whitespace-nowrap">Saldo
+                    Awal</span>
+                <input type="number" id="initialBalanceInput" placeholder="0" value="0"
+                    class="bg-transparent text-sm font-semibold text-accent-blue outline-none w-full md:w-28 text-right">
+            </div>
         </div>
 
         <!-- Table -->
@@ -260,6 +266,5 @@
     <script src="app.js"></script>
     <script>lucide.createIcons();</script>
 </body>
-
 
 </html>

@@ -184,7 +184,7 @@ function categorize(r) {
     if (r.includes('reimbursement')) return 'Reimbursements';
     if (r.includes('bank') || r.includes('transfer')) return 'Internal Transfers';
     if (r.includes('severance')) return 'Severance Pay';
-    if (['miss', '-', 'miss '].includes(r.trim())) return 'Correction/Misc';
+    if (['miss', 'miss '].includes(r.trim())) return 'Correction/Misc';
     return 'Miscellaneous';
 }
 
@@ -217,9 +217,7 @@ function isCorrection(r) {
     const regex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'i');
 
     if (regex.test(r)) return true;
-    return ['miss', '-', 'miss '].includes(r.trim().toLowerCase());
-    if (regex.test(r)) return true;
-    return ['miss', '-', 'miss '].includes(r.trim().toLowerCase());
+    return ['miss', 'miss '].includes(r.trim().toLowerCase());
 }
 
 function excludeCorrectionPairs(data) {
@@ -270,7 +268,8 @@ function updateUI() {
     const year = YearSelector.value === 'all' ? 'all' : parseInt(YearSelector.value);
     const month = MonthSelector.value === 'all' ? 'all' : parseInt(MonthSelector.value);
     const type = TypeSelector.value;
-    const searchQuery = SearchInput.value.toLowerCase(); // Get search query
+    const searchQuery = SearchInput.value.toLowerCase();
+    const initialBalance = parseFloat(document.getElementById('initialBalanceInput')?.value) || 0;
 
     let filtered = dashboardData;
     if (year !== 'all') filtered = filtered.filter(d => d.year === year);
@@ -290,7 +289,7 @@ function updateUI() {
 
     const dep = filtered.filter(d => d.action.toLowerCase() === 'deposit').reduce((s, d) => s + d.balance, 0);
     const wit = filtered.filter(d => d.action.toLowerCase() === 'withdraw').reduce((s, d) => s + d.balance, 0);
-    const net = dep - wit;
+    const net = initialBalance + dep - wit;
 
     document.getElementById('totalDeposit').textContent = fmt(dep);
     document.getElementById('totalWithdraw').textContent = fmt(wit);
@@ -299,7 +298,7 @@ function updateUI() {
     document.getElementById('transCount').textContent = `${filtered.length} Records`;
 
     renderClosingSummary(net, year, month);
-    renderTable(filtered);
+    renderTable(filtered, initialBalance);
     renderCharts(filtered);
     renderInsights(filtered);
 
@@ -355,7 +354,11 @@ function renderClosingSummary(net, year, month) {
         statusText.innerHTML = `<span class="${statusColor} font-bold">${statusLabel}</span> • ${fmt(net)}`;
 
         instruction.classList.remove('hidden');
-        instructionText.textContent = `Untuk menolkan saldo, catat transaksi ${actionNeeded} sebesar ${amtNeeded} dengan alasan: "[CLOSE] Tutup Buku ${periodName}".`;
+        if (isDeficit) {
+            instructionText.innerHTML = `Akun ini mengalami defisit sebesar <b>${amtNeeded}</b>. <br><span class="text-[10px] opacity-60">Catatan: Jika data tidak lengkap dari awal, masukkan <b>Saldo Awal</b> di atas untuk menyesuaikan.</span>`;
+        } else {
+            instructionText.textContent = `Untuk menolkan saldo, catat transaksi ${actionNeeded} sebesar ${amtNeeded} dengan alasan: "[CLOSE] Tutup Buku ${periodName}".`;
+        }
 
         copyBtn.classList.remove('hidden');
         balancedBadge.classList.add('hidden');
@@ -372,7 +375,7 @@ function renderClosingSummary(net, year, month) {
     lucide.createIcons();
 }
 
-function renderTable(data) {
+function renderTable(data, startBal = 0) {
     // Sort oldest to newest for accurate running balance
     data.sort((a, b) => {
         const da = parseDate(a.date);
@@ -380,7 +383,7 @@ function renderTable(data) {
         return da - db;
     });
 
-    let runningBalance = 0;
+    let runningBalance = startBal;
 
     document.getElementById('reportTableBody').innerHTML = data.map(r => {
         const isDeposit = r.action.toLowerCase() === 'deposit';
